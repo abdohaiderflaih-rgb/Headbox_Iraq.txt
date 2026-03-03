@@ -1,0 +1,35 @@
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function createHitbox(character)
+	local head = character:WaitForChild("Head", 5)
+	if not head then return end
+
+	head.Size = Vector3.new(35, 35, 35)
+	head.Transparency = 0.35
+	head.Material = Enum.Material.ForceField
+	head.Color = Color3.fromRGB(255, 0, 0)
+	head.CanCollide = false
+	head.Massless = true
+
+	local box = Instance.new("SelectionBox")
+	box.Adornee = head
+	box.LineThickness = 0.15
+	box.Color3 = Color3.fromRGB(255, 0, 0)
+	box.Parent = head
+end
+
+for _, plr in pairs(Players:GetPlayers()) do
+	if plr ~= LocalPlayer then
+		if plr.Character then
+			createHitbox(plr.Character)
+		end
+		plr.CharacterAdded:Connect(createHitbox)
+	end
+end
+
+Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(createHitbox)
+end)
+]])()
