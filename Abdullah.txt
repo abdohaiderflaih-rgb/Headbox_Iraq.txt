@@ -1,0 +1,186 @@
+-- HEIDBOX IRAQ V6 (By Abdullah Update)
+-- Features: 5-Second Intro, Instant Update, Hitbox Iraq UI
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+
+-- 1. INTRO SYSTEM (Abdullah)
+local IntroGui = Instance.new("ScreenGui")
+IntroGui.Name = "Abdullah_Intro"
+IntroGui.Parent = CoreGui
+
+local IntroFrame = Instance.new("Frame")
+IntroFrame.Size = UDim2.new(0, 0, 0, 90) 
+IntroFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
+IntroFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+IntroFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+IntroFrame.BorderSizePixel = 2
+IntroFrame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+IntroFrame.ClipsDescendants = true
+IntroFrame.Parent = IntroGui
+
+local IntroText1 = Instance.new("TextLabel")
+IntroText1.Text = "by Abdullah" -- Changed as requested
+IntroText1.Size = UDim2.new(1, 0, 0.5, 0)
+IntroText1.TextColor3 = Color3.fromRGB(255, 255, 255)
+IntroText1.BackgroundTransparency = 1
+IntroText1.Font = Enum.Font.GothamBold
+IntroText1.TextSize = 28
+IntroText1.Parent = IntroFrame
+
+local IntroText2 = Instance.new("TextLabel")
+IntroText2.Text = "المطور عبدالله"
+IntroText2.Size = UDim2.new(1, 0, 0.5, 0)
+IntroText2.Position = UDim2.new(0, 0, 0.5, 0)
+IntroText2.TextColor3 = Color3.fromRGB(0, 255, 0)
+IntroText2.BackgroundTransparency = 1
+IntroText2.Font = Enum.Font.GothamBold
+IntroText2.TextSize = 22
+IntroText2.Parent = IntroFrame
+
+-- Intro Animation Logic
+IntroFrame:TweenSize(UDim2.new(0.9, 0, 0, 90), "Out", "Quad", 0.6) 
+task.wait(5) 
+IntroFrame:TweenSize(UDim2.new(0, 0, 0, 90), "In", "Quad", 0.5) 
+task.wait(0.6)
+IntroGui:Destroy() 
+
+-- 2. MAIN MENU (هيدبوكس عراق)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HEIDBOX_IRAQ"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false 
+
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+
+local Config = {
+    Active = false,
+    Size = 2,
+    Color = Color3.fromRGB(0, 255, 0),
+    RGB = false,
+    Minimized = false
+}
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 260)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+Title.Parent = MainFrame
+Title.Text = "هيدبوكس عراق"
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local function CreateButton(name, pos, text)
+    local btn = Instance.new("TextButton")
+    btn.Parent = MainFrame
+    btn.Name = name
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Position = UDim2.new(0.05, 0, 0, pos)
+    btn.Text = text
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    return btn
+end
+
+local ToggleBtn = CreateButton("Toggle", 50, "Status: OFF")
+local SizeInput = Instance.new("TextBox")
+SizeInput.Parent = MainFrame
+SizeInput.PlaceholderText = "Hitbox Size"
+SizeInput.Size = UDim2.new(0.9, 0, 0, 35)
+SizeInput.Position = UDim2.new(0.05, 0, 0, 100)
+SizeInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+SizeInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+SizeInput.Text = ""
+
+local ColorBtn = CreateButton("Color", 150, "Random Color")
+local RGBBtn = CreateButton("RGB", 200, "RGB: OFF")
+
+local function ResetAllHitboxes()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            plr.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
+        end
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    if Config.RGB then
+        Config.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+        ColorBtn.BackgroundColor3 = Config.Color
+    end
+    if Config.Active then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+                if hrp and hum and hum.Health > 0 then
+                    hrp.Size = Vector3.new(Config.Size, Config.Size, Config.Size)
+                    hrp.Transparency = 0.7
+                    hrp.Color = Config.Color
+                    hrp.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+SizeInput:GetPropertyChangedSignal("Text"):Connect(function()
+    local newSize = tonumber(SizeInput.Text)
+    if newSize then
+        Config.Size = newSize
+        if Config.Active then ResetAllHitboxes() end
+    end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    Config.Active = not Config.Active
+    ToggleBtn.Text = Config.Active and "Status: ON" or "Status: OFF"
+    ToggleBtn.BackgroundColor3 = Config.Active and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(150, 0, 0)
+    if not Config.Active then ResetAllHitboxes() end
+end)
+
+ColorBtn.MouseButton1Click:Connect(function()
+    Config.Color = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+    ColorBtn.BackgroundColor3 = Config.Color
+end)
+
+RGBBtn.MouseButton1Click:Connect(function()
+    Config.RGB = not Config.RGB
+    RGBBtn.Text = Config.RGB and "RGB: ON" or "RGB: OFF"
+end)
+
+local MinBtn = Instance.new("TextButton", MainFrame)
+MinBtn.Text = "-"
+MinBtn.Size = UDim2.new(0, 20, 0, 35)
+MinBtn.Position = UDim2.new(1, -40, 0, 0)
+MinBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local ExitBtn = Instance.new("TextButton", MainFrame)
+ExitBtn.Text = "X"
+ExitBtn.Size = UDim2.new(0, 20, 0, 35)
+ExitBtn.Position = UDim2.new(1, -20, 0, 0)
+ExitBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+ExitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+MinBtn.MouseButton1Click:Connect(function()
+    Config.Minimized = not Config.Minimized
+    for _, v in pairs(MainFrame:GetChildren()) do
+        if v ~= Title and v ~= MinBtn and v ~= ExitBtn then v.Visible = not Config.Minimized end
+    end
+    MainFrame.Size = Config.Minimized and UDim2.new(0, 200, 0, 35) or UDim2.new(0, 200, 0, 260)
+end)
+
+ExitBtn.MouseButton1Click:Connect(function()
+    ResetAllHitboxes()
+    ScreenGui:Destroy()
+end)
